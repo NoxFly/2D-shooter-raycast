@@ -19,9 +19,9 @@ void Wall::draw(sf::RenderWindow &window) {
 }
 
 sf::Vector2f Wall::getPosition() const {
-	return m_position;
+	return sf::Vector2f(m_position.x-3, m_position.y-3);
 }
 
 sf::Vector2f Wall::getSize() const {
-	return m_size;
+	return sf::Vector2f(m_size.x+6, m_size.y+6);
 }

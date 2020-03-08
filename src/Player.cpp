@@ -100,7 +100,7 @@ float angle(sf::Vector2f v) {
 
 float vectorToAngle(sf::Vector2f v1, sf::Vector2f v2) {
 	auto r = std::atan2( v2.y - v1.y, v2.x - v1.x ) * 180 / M_PI;
-    return r < 0 ? r + 360 : r;
+	return r < 0 ? r + 360 : r;
 }
 
 std::vector<sf::Vector2f> getCirclePoints(float angle, float spread, float radius) {
@@ -113,13 +113,26 @@ std::vector<sf::Vector2f> getCirclePoints(float angle, float spread, float radiu
     return ret;
 }
 
+bool is_angle_between(float target, float angle1, float angle2) {
+  // make the angle from angle1 to angle2 to be <= 180 degrees
+  float rAngle = fmod( fmod(angle2 - angle1, 360) + 360, 360);
+  if (rAngle >= 180)
+    std::swap(angle1, angle2);
+
+  // check if it passes through zero
+  if (angle1 <= angle2)
+    return target >= angle1 && target <= angle2;
+  else
+    return target >= angle1 || target <= angle2;
+}
+
 void Player::drawVision(sf::RenderWindow &window) {
 	sf::VertexArray arr(sf::LinesStrip);
 
     arr.append(sf::Vertex(m_position, sf::Color::Green));
     
 	for(sf::Vector2f v : getCirclePoints(angle(m_lookPoint - m_position), degToRad(m_visionAngle), m_visionRange))
-    	arr.append(sf::Vertex(m_position + v, sf::Color::Green));
+		arr.append(sf::Vertex(m_position + v, sf::Color::Green));
 
     arr.append(sf::Vertex(m_position, sf::Color::Green));
 
@@ -162,10 +175,10 @@ void Player::sonar(sf::RenderWindow &window, std::vector<Wall*> &walls) {
 
 	printf("c1: %f, c2: %f, c3: %f, c4: %f\n", c1, c2, c3, c4);
 
-	if(a1 < c1 && c1 < a2) closest.push_back(sf::Vector2f(0, 0));
-	if(a1 < c2 && c2 < a2) closest.push_back(sf::Vector2f(m_limits.x, 0));
-	if(a1 < c3 && c3 < a2) closest.push_back(m_limits);
-	if(a1 < c4 && c4 < a2) closest.push_back(sf::Vector2f(0, m_limits.y));
+	if(is_angle_between(c1, a1, a2)) closest.push_back(sf::Vector2f(0, 0));
+	if(is_angle_between(c2, a1, a2)) closest.push_back(sf::Vector2f(m_limits.x, 0));
+	if(is_angle_between(c3, a1, a2)) closest.push_back(m_limits);
+	if(is_angle_between(c4, a1, a2)) closest.push_back(sf::Vector2f(0, m_limits.y));
 
 	for(auto wall : walls) {
 		sf::Vector2f wallPos = wall->getPosition();
@@ -178,10 +191,10 @@ void Player::sonar(sf::RenderWindow &window, std::vector<Wall*> &walls) {
 
 		// store the 4 vertex of the wall if they validate all requires
 		// -- in visionAngle
-		if(a1 < c1 && c1 < a2) closest.push_back(wallPos);
-		if(a1 < c2 && c2 < a2) closest.push_back(sf::Vector2f(wallPos.x+wallSize.x, wallPos.y));
-		if(a1 < c3 && c3 < a2) closest.push_back(sf::Vector2f(wallPos.x, wallPos.y+wallSize.y));
-		if(a1 < c4 && c4 < a2) closest.push_back(sf::Vector2f(wallPos.x+wallSize.x, wallPos.y+wallSize.y));
+		if(is_angle_between(c1, a1, a2)) closest.push_back(wallPos);
+		if(is_angle_between(c2, a1, a2)) closest.push_back(sf::Vector2f(wallPos.x+wallSize.x, wallPos.y));
+		if(is_angle_between(c3, a1, a2)) closest.push_back(sf::Vector2f(wallPos.x, wallPos.y+wallSize.y));
+		if(is_angle_between(c4, a1, a2)) closest.push_back(sf::Vector2f(wallPos.x+wallSize.x, wallPos.y+wallSize.y));
 	}
 
 	// eliminate who's not in the visionAngle
