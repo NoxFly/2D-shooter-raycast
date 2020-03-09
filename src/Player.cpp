@@ -41,6 +41,8 @@ void Player::move(sf::Vector2i vec) {
 
 	if(m_position.x + m_size > m_limits.x) m_position.x = m_limits.x - m_size; // right limit
 	if(m_position.y + m_size > m_limits.y) m_position.y = m_limits.y - m_size; // bottom limit
+
+	m_lookPoint = sf::Vector2f(m_position.x + m_dir.x*m_visionRange, m_position.y + m_dir.y*m_visionRange);
 }
 
 void Player::draw(sf::RenderWindow &window) {
