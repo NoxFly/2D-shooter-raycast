@@ -18,6 +18,8 @@ class Player {
 
 		void move(int x, int y);
 		void move(sf::Vector2i vec);
+		void setPosition(float x, float y);
+		void setPosition(sf::Vector2i v);
 		void rotate(int direction);
 		void draw(sf::RenderWindow &window);
 

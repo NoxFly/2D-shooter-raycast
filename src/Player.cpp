@@ -4,7 +4,7 @@
 #include <iostream>
 #include <algorithm>
 
-Player::Player(float x, float y): m_limits(0, 0), m_position(x, y), m_size(15), m_visionAngle(90), m_visionRange(200), m_heading(0), m_speed(2), m_rotationSpeed(0.05), m_dir(sf::Vector2f(cos(m_heading), sin(m_heading))), m_lookPoint(m_position.x + m_dir.x*m_visionRange, m_position.y + m_dir.y*m_visionRange) {
+Player::Player(float x, float y): m_limits(0, 0), m_position(x, y), m_size(15), m_visionAngle(140), m_visionRange(200), m_heading(0), m_speed(2), m_rotationSpeed(0.05), m_dir(sf::Vector2f(cos(m_heading), sin(m_heading))), m_lookPoint(m_position.x + m_dir.x*m_visionRange, m_position.y + m_dir.y*m_visionRange) {
 	
 }
 
@@ -43,6 +43,17 @@ void Player::move(sf::Vector2i vec) {
 	if(m_position.y + m_size > m_limits.y) m_position.y = m_limits.y - m_size; // bottom limit
 
 	m_lookPoint = sf::Vector2f(m_position.x + m_dir.x*m_visionRange, m_position.y + m_dir.y*m_visionRange);
+}
+
+void Player::setPosition(float x, float y) {
+	m_position.x = x;
+	m_position.y = y;
+	move(0, 0);
+}
+
+void Player::setPosition(sf::Vector2i v) {
+	m_position = (sf::Vector2f)v;
+	move(0, 0);
 }
 
 void Player::draw(sf::RenderWindow &window) {
@@ -107,7 +118,7 @@ float vectorToAngle(sf::Vector2f v1, sf::Vector2f v2) {
 
 std::vector<sf::Vector2f> getCirclePoints(float angle, float spread, float radius) {
     std::vector<sf::Vector2f> ret;
-    const int maxpts = 10;
+    const int maxpts = 15;
     for(int i = 0; i < maxpts; ++i) {
         const float a = (angle - spread / 2.f) + (i * spread) / (maxpts - 1);
         ret.push_back(radius * sf::Vector2f(cos(a), sin(a)));
@@ -115,17 +126,14 @@ std::vector<sf::Vector2f> getCirclePoints(float angle, float spread, float radiu
     return ret;
 }
 
-bool is_angle_between(float target, float angle1, float angle2) {
-  // make the angle from angle1 to angle2 to be <= 180 degrees
-  float rAngle = fmod( fmod(angle2 - angle1, 360) + 360, 360);
-  if (rAngle >= 180)
-    std::swap(angle1, angle2);
+bool isAngleBetween(float target, float angle1, float angle2) {
+	// make the angle from angle1 to angle2 to be <= 180 degrees
+	float rAngle = fmod(fmod(angle2 - angle1, 360) + 360, 360);
+	if(rAngle >= 180) std::swap(angle1, angle2);
 
-  // check if it passes through zero
-  if (angle1 <= angle2)
-    return target >= angle1 && target <= angle2;
-  else
-    return target >= angle1 || target <= angle2;
+	// check if it passes through zero
+	if(angle1 <= angle2) return target >= angle1 && target <= angle2;
+	else return target >= angle1 || target <= angle2;
 }
 
 float dist(sf::Vector2f point1, sf::Vector2f point2) {
@@ -196,12 +204,7 @@ void Player::sonar(sf::RenderWindow &window, std::vector<Wall*> &walls) {
 		if(isUnderVision(p2, a)) closest.push_back(p2);
 		if(isUnderVision(p3, a)) closest.push_back(p3);
 		if(isUnderVision(p4, a)) closest.push_back(p4);
-	}
-
-	// eliminate who's not in the visionAngle - done
-	// eliminate who's not in the visionRange - doing
-	// eliminate who's not the closest - to do
-	
+	}	
 
 	// display closest vertex
 	sf::Vertex line[2];
@@ -217,7 +220,7 @@ bool Player::isUnderVision(sf::Vector2f &point, float *a) {
 	int r = 0;
 	
 	// -- in visionAngle
-	if(is_angle_between(vectorToAngle(m_position, point), a[0], a[1])) r++;
+	if(isAngleBetween(vectorToAngle(m_position, point), a[0], a[1])) r++;
 
 	// -- in visionRange
 	if(dist(m_position, point) <= dist(m_position, m_lookPoint)) r++;

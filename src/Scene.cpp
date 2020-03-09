@@ -98,6 +98,10 @@ void Scene::updatePlayer() {
 	if(m_input.isKeyDown(sf::Keyboard::Q)) m_player.rotate(-1);
 	if(m_input.isKeyDown(sf::Keyboard::D)) m_player.rotate(1);
 
+	if(m_input.isMouseButtonDown(sf::Mouse::Left)) {
+		m_player.setPosition(sf::Mouse::getPosition(m_window));
+	}
+
 
 	m_player.collide(m_walls); // detect physical collision with walls
 }
