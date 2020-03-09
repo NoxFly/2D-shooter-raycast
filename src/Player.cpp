@@ -126,6 +126,10 @@ bool is_angle_between(float target, float angle1, float angle2) {
     return target >= angle1 || target <= angle2;
 }
 
+float dist(sf::Vector2f point1, sf::Vector2f point2) {
+	return hypot(point2.x-point1.x, point2.y-point1.y);
+}
+
 void Player::drawVision(sf::RenderWindow &window) {
 	sf::VertexArray arr(sf::LinesStrip);
 
@@ -152,54 +156,49 @@ void Player::sonar(sf::RenderWindow &window, std::vector<Wall*> &walls) {
 	d = sf::Vector2f(cos(h), sin(h));
 	boundaries[1] = sf::Vector2f(m_position.x + d.x*m_visionRange, m_position.y + d.y*m_visionRange);
 
-	sf::Vertex v1[] = {sf::Vertex(m_position, sf::Color::Blue), sf::Vertex(boundaries[0], sf::Color::Blue)};
-	sf::Vertex v2[] = {sf::Vertex(m_position, sf::Color::Blue), sf::Vertex(boundaries[1], sf::Color::Blue)};
+	float a[] = {
+		std::min(vectorToAngle(m_position, boundaries[0]), vectorToAngle(m_position, boundaries[1])),
+		std::max(vectorToAngle(m_position, boundaries[0]), vectorToAngle(m_position, boundaries[1]))
+	};
 
-	window.draw(v1, 2, sf::Lines);
-	window.draw(v2, 2, sf::Lines);
-
-	float a1 = std::min(vectorToAngle(m_position, boundaries[0]), vectorToAngle(m_position, boundaries[1]));
-	float a2 = std::max(vectorToAngle(m_position, boundaries[0]), vectorToAngle(m_position, boundaries[1]));
-
-	printf("a1: %f | a2: %f\n", a1, a2);
 	//
 
 	std::vector<sf::Vector2f> closest = {};
 
-	float c1, c2, c3, c4;
+	// c1 = vectorToAngle(m_position, sf::Vector2f(0, 0));
+	// c2 = vectorToAngle(m_position, sf::Vector2f(m_limits.x, 0));
+	// c3 = vectorToAngle(m_position, m_limits);
+	// c4 = vectorToAngle(m_position, sf::Vector2f(0, m_limits.y));
 
-	c1 = vectorToAngle(m_position, sf::Vector2f(0, 0));
-	c2 = vectorToAngle(m_position, sf::Vector2f(m_limits.x, 0));
-	c3 = vectorToAngle(m_position, m_limits);
-	c4 = vectorToAngle(m_position, sf::Vector2f(0, m_limits.y));
+	sf::Vector2f p1 = sf::Vector2f(0, 0);
+	sf::Vector2f p2 = sf::Vector2f(m_limits.x, 0);
+	sf::Vector2f p3 = m_limits;
+	sf::Vector2f p4 = sf::Vector2f(0, m_limits.y);
 
-	printf("c1: %f, c2: %f, c3: %f, c4: %f\n", c1, c2, c3, c4);
-
-	if(is_angle_between(c1, a1, a2)) closest.push_back(sf::Vector2f(0, 0));
-	if(is_angle_between(c2, a1, a2)) closest.push_back(sf::Vector2f(m_limits.x, 0));
-	if(is_angle_between(c3, a1, a2)) closest.push_back(m_limits);
-	if(is_angle_between(c4, a1, a2)) closest.push_back(sf::Vector2f(0, m_limits.y));
+	if(isUnderVision(p1, a)) closest.push_back(p1);
+	if(isUnderVision(p2, a)) closest.push_back(p2);
+	if(isUnderVision(p3, a)) closest.push_back(p3);
+	if(isUnderVision(p4, a)) closest.push_back(p4);
+	
 
 	for(auto wall : walls) {
-		sf::Vector2f wallPos = wall->getPosition();
 		sf::Vector2f wallSize = wall->getSize();
+		
+		p1 = wall->getPosition();
+		p2 = sf::Vector2f(p1.x+wallSize.x, p1.y);
+		p3 = sf::Vector2f(p1.x, p1.y+wallSize.y);
+		p4 = sf::Vector2f(p1.x+wallSize.x, p1.y+wallSize.y);
 
-		c1 = vectorToAngle(m_position, wallPos);
-		c2 = vectorToAngle(m_position, sf::Vector2f(wallPos.x+wallSize.x, wallPos.y));
-		c3 = vectorToAngle(m_position, sf::Vector2f(wallPos.x, wallPos.y+wallSize.y));
-		c4 = vectorToAngle(m_position, sf::Vector2f(wallPos.x+wallSize.x, wallPos.y+wallSize.y));
-
-		// store the 4 vertex of the wall if they validate all requires
-		// -- in visionAngle
-		if(is_angle_between(c1, a1, a2)) closest.push_back(wallPos);
-		if(is_angle_between(c2, a1, a2)) closest.push_back(sf::Vector2f(wallPos.x+wallSize.x, wallPos.y));
-		if(is_angle_between(c3, a1, a2)) closest.push_back(sf::Vector2f(wallPos.x, wallPos.y+wallSize.y));
-		if(is_angle_between(c4, a1, a2)) closest.push_back(sf::Vector2f(wallPos.x+wallSize.x, wallPos.y+wallSize.y));
+		// add it ?
+		if(isUnderVision(p1, a)) closest.push_back(p1);
+		if(isUnderVision(p2, a)) closest.push_back(p2);
+		if(isUnderVision(p3, a)) closest.push_back(p3);
+		if(isUnderVision(p4, a)) closest.push_back(p4);
 	}
 
-	// eliminate who's not in the visionAngle
-	// eliminate who's not in the visionRange
-	// eliminate who's not the closest
+	// eliminate who's not in the visionAngle - done
+	// eliminate who's not in the visionRange - doing
+	// eliminate who's not the closest - to do
 	
 
 	// display closest vertex
@@ -210,4 +209,16 @@ void Player::sonar(sf::RenderWindow &window, std::vector<Wall*> &walls) {
 		line[1] = sf::Vertex(sf::Vector2f(vertex.x, vertex.y), sf::Color::Red);
 		window.draw(line, 2, sf::Lines);
 	}
+}
+
+bool Player::isUnderVision(sf::Vector2f &point, float *a) {
+	int r = 0;
+	
+	// -- in visionAngle
+	if(is_angle_between(vectorToAngle(m_position, point), a[0], a[1])) r++;
+
+	// -- in visionRange
+	if(dist(m_position, point) <= dist(m_position, m_lookPoint)) r++;
+
+	return r == 2;
 }

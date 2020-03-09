@@ -25,6 +25,8 @@ class Player {
 		void sonar(sf::RenderWindow &window, std::vector<Wall*> &walls);
 		void drawVision(sf::RenderWindow &window);
 
+		bool isUnderVision(sf::Vector2f &point, float *a);
+
 	private:
 		sf::Vector2f m_limits;
 		sf::Vector2f m_position;
