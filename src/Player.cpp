@@ -118,7 +118,7 @@ float vectorToAngle(sf::Vector2f v1, sf::Vector2f v2) {
 
 std::vector<sf::Vector2f> getCirclePoints(float angle, float spread, float radius) {
     std::vector<sf::Vector2f> ret;
-    const int maxpts = 15;
+    const int maxpts = spread/M_PI*30;
     for(int i = 0; i < maxpts; ++i) {
         const float a = (angle - spread / 2.f) + (i * spread) / (maxpts - 1);
         ret.push_back(radius * sf::Vector2f(cos(a), sin(a)));
