@@ -3,8 +3,17 @@
 #include <algorithm>
 #include <iostream>
 
-Scene::Scene(int width, int height, std::string title): m_window(sf::VideoMode(width, height),  title), m_input(m_window), m_player(width/2, height/2), m_walls{}, m_cellContext{0, 40, sf::Vector2i(0,0)} {   
-    // set the window at the center of the screen
+Scene::Scene(int width, int height, std::string title):
+	m_window(sf::VideoMode(width, height),  title),
+	m_input(m_window),
+	m_player(width/2, height/2),
+	m_walls{},
+	m_cellContext{0, 40, sf::Vector2i(0,0)}
+{
+
+	// m_window.setFramerateLimit(60);
+    
+	// set the window at the center of the screen
 	const auto desktop = sf::VideoMode::getDesktopMode();
     sf::Vector2i middleScreen(desktop.width/2 - width/2, desktop.height/2 - height/2);
 	m_window.setPosition(middleScreen);
@@ -15,7 +24,7 @@ Scene::Scene(int width, int height, std::string title): m_window(sf::VideoMode(w
 	// define a cell ratio related to width/height window's properties
 	m_cellContext.ratio = std::max((float)winWidth(), (float)winHeight()) / std::min((float)winWidth(), (float)winHeight());
 	m_cellContext.ratio *= m_cellContext.cellSize;
-	m_cellContext.nCells = sf::Vector2i(winWidth()/m_cellContext.ratio*m_cellContext.cellSize, winHeight()/m_cellContext.ratio*m_cellContext.cellSize);
+	m_cellContext.nCells = sf::Vector2i(winWidth()/m_cellContext.ratio + 1, winHeight()/m_cellContext.ratio + 1);
 
 	// create some walls
 	createWall(2, 2, 1, 1);
@@ -26,6 +35,7 @@ Scene::Scene(int width, int height, std::string title): m_window(sf::VideoMode(w
 
 	// then run the main loop
 	mainLoop();
+
 }
 
 Scene::~Scene() {
@@ -62,7 +72,9 @@ void Scene::mainLoop() {
 		m_player.draw(m_window);
 
 		// draw all walls
-		for(auto wall : m_walls) wall->draw(m_window);
+		for(auto wall : m_walls) {
+			wall->draw(m_window);
+		}
 
 		// then display everything
 		m_window.display();

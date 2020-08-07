@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export DISPLAY=localhost:0.0
+
 printf "\-\-\- Running shell script -/-/-/\n"
 
 exepath="./bin"

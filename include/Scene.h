@@ -5,7 +5,6 @@
 #include <SFML/Graphics.hpp>
 
 #include <string>
-#include <string>
 
 #include "Input.h"
 #include "Player.h"
