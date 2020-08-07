@@ -1,6 +1,11 @@
 #include "Input.h"
 
-Input::Input(sf::RenderWindow &window): m_window(window) {
+
+
+
+Input::Input(sf::RenderWindow &window):
+    m_window(window)
+{
     // init to false all the keys state
     for(auto i=0; i < sf::Keyboard::KeyCount; i++) {
         m_keys[i] = false;
@@ -14,23 +19,44 @@ Input::Input(sf::RenderWindow &window): m_window(window) {
     }
 }
 
+
+
+
 Input::~Input() {
 
 }
 
+
+
+
+
+
 void Input::update() {
+    // resets the keypressed state
+
+    // for each keys on the keyboard
     for(auto i=0; i < sf::Keyboard::KeyCount; i++)
         m_pressed_keys[i] = false;
+
+    // for each buttons on the mouse
     for(auto i=0; i < sf::Mouse::ButtonCount; i++)
         m_mouseButtons_pressed[i] = false;
 
+    //
 
+
+    
     sf::Event event;
+    
     // pops each event and treat them
     while(m_window.pollEvent(event)) {
         eventTreatment(event);
     }
 }
+
+
+
+
 
 void Input::eventTreatment(sf::Event event) {
     switch(event.type) {
@@ -66,6 +92,13 @@ void Input::eventTreatment(sf::Event event) {
     }
 
 }
+
+
+
+
+
+
+
 
 // getters
 

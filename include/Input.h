@@ -10,6 +10,9 @@ class Input {
     public:
         // get a pointer to the window the input class must listen to
         // instead of passing it each frame in argument in the update() method
+        /**
+         * @param window the window to bind the inputs
+         */
         Input(sf::RenderWindow &window);
         ~Input();
 
