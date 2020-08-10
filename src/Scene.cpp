@@ -76,18 +76,19 @@ void Scene::mainLoop() {
 
 		// draw the grid
 		drawGrid();
-
-		m_player.sonar(m_window, m_walls); // play a sonar to detect which walls are closest
-
-		m_player.drawVision(m_window);
-
-		// draw the player
-		m_player.draw(m_window);
-
+		
 		// draw all walls
 		for(auto wall : m_walls) {
 			wall->draw(m_window);
 		}
+
+		// vision shape
+		m_player.drawVision(m_window, m_walls);
+
+		// draw the player
+		m_player.draw(m_window);
+
+		
 
 		// then display everything
 		m_window.display();

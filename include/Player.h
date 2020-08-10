@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Wall.h"
+#include "Ray.h"
 
 class Player {
 	public:
@@ -64,12 +65,17 @@ class Player {
 		/**
 		 * Rotates the player's heading
 		 */
-		void rotate(int direction);
+		void rotate(int dir);
 
 		/**
 		 * Draws the player
 		 */
 		void draw(sf::RenderWindow &window);
+
+		/**
+		 * Returns the points of the player vision's rays that hit walls
+		 */
+		std::vector<sf::Vector2f> looks(std::vector<Wall*> &walls);
 
 		/**
 		 * Checks collision with given walls
@@ -78,25 +84,19 @@ class Player {
 		void collide(std::vector<Wall*> &walls);
 
 		/**
-		 * Draws a red line on every walls that are on the player's vision
-		 * @param window the window we will draw the red lines
-		 * @param walls the walls to check
-		 */
-		void sonar(sf::RenderWindow &window, std::vector<Wall*> &walls);
-
-		/**
 		 * Draws the player's vision
 		 * @param window the window we must draw the vision
 		 */
-		void drawVision(sf::RenderWindow &window);
+		void drawVision(sf::RenderWindow &window, std::vector<Wall*> &walls);
+
 
 		/**
-		 * Check if a given point is in the player's vision
-		 * @param point the given point the check
-		 * @param a the player's vision range limit on both extremities
-		 * @return either the point is in the player's vision
+		 * GETTER - Gets the player's direction thanks his heading
+		 * @return vector direction
 		 */
-		bool isUnderVision(sf::Vector2f &point, float *a);
+		sf::Vector2f direction() const;
+
+
 
 	private:
 		// limits the player cannot surpass
@@ -120,14 +120,14 @@ class Player {
 		// player's rotation's speed
 		float m_rotationSpeed;
 
-		// 
-		sf::Vector2f m_dir;
-
 		// player circle's size
 		int m_size;
 
 		// where the player is looking at
 		sf::Vector2f m_lookPoint;
+
+		// player vision's rays
+		std::vector<Ray> m_rays;
 };
 
 #endif // player

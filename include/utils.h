@@ -15,6 +15,13 @@
 float degToRad(float deg);
 
 /**
+ * Converts radians to degrees
+ * @param rad angle in radians
+ * @returns angle in degrees
+ */
+float radToDeg(float rad);
+
+/**
  * Get the angle of a vector
  * @param v vector
  * @return the angle in radians
@@ -28,6 +35,13 @@ float angle(sf::Vector2f v);
  * @return angle in radians
  */
 float vectorToAngle(sf::Vector2f v1, sf::Vector2f v2);
+
+/**
+ * Get the vector of an angle
+ * @param angle angle in radian
+ * @return vector
+ */
+sf::Vector2f angleToVector(float angle);
 
 /**
  * Get the points of an arc

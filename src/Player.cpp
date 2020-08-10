@@ -1,7 +1,10 @@
 #include "Player.h"
 #include "utils.h"
 
+#include <limits>
 #include <cmath>
+#include <algorithm>
+#include <stdlib.h>
 
 
 Player::Player(float x, float y):
@@ -13,10 +16,12 @@ Player::Player(float x, float y):
 	m_heading(0),
 	m_speed(2),
 	m_rotationSpeed(0.05),
-	m_dir(sf::Vector2f(cos(m_heading), sin(m_heading))),
-	m_lookPoint(m_position.x + m_dir.x * m_visionRange, m_position.y + m_dir.y * m_visionRange)
+	m_lookPoint(m_position.x + direction().x * m_visionRange, m_position.y + direction().y * m_visionRange),
+	m_rays{}
 {
-	
+	for(float i = -m_visionAngle/2; i < m_visionAngle/2; i += 1) {
+		m_rays.push_back(Ray(m_position, m_heading, degToRad(i), m_visionRange));
+	}
 }
 
 
@@ -27,6 +32,12 @@ Player::~Player() {
 
 
 
+
+
+
+sf::Vector2f Player::direction() const {
+	return angleToVector(m_heading);
+}
 
 
 
@@ -65,7 +76,7 @@ void Player::move(sf::Vector2i vec) {
 	if(m_position.x + m_size > m_limits.x) m_position.x = m_limits.x - m_size; // right limit
 	if(m_position.y + m_size > m_limits.y) m_position.y = m_limits.y - m_size; // bottom limit
 
-	m_lookPoint = sf::Vector2f(m_position.x + m_dir.x * m_visionRange, m_position.y + m_dir.y * m_visionRange);
+	m_lookPoint = sf::Vector2f(m_position.x + direction().x * m_visionRange, m_position.y + direction().y * m_visionRange);
 }
 
 
@@ -89,7 +100,7 @@ void Player::setPosition(sf::Vector2i v) {
 
 void Player::draw(sf::RenderWindow &window) {
 	// draw the player
-	sf::CircleShape circle(m_size, 15);
+	sf::CircleShape circle(m_size, 30);
 
 	circle.setFillColor(sf::Color(255, 160, 0));
 	circle.setOrigin(m_size, m_size);
@@ -101,11 +112,36 @@ void Player::draw(sf::RenderWindow &window) {
 
 
 
+void Player::drawVision(sf::RenderWindow &window, std::vector<Wall*> &walls) {
+	sf::VertexArray arr(sf::TriangleFan);
 
-void Player::rotate(int direction) {
-	m_heading += direction * m_rotationSpeed;
-	m_dir = sf::Vector2f(cos(m_heading), sin(m_heading));
-	m_lookPoint = sf::Vector2f(m_position.x + m_dir.x * m_visionRange, m_position.y + m_dir.y * m_visionRange);
+	sf::Color color(0, 255, 0, 100);
+
+    arr.append(sf::Vertex(m_position, color));
+    
+	for(auto v : looks(walls)) {
+		arr.append(sf::Vertex(v, color));
+	}
+
+    arr.append(sf::Vertex(m_position, color));
+
+	window.draw(arr);
+}
+
+
+
+
+
+void Player::rotate(int dir) {
+	m_heading += dir * m_rotationSpeed;
+
+	auto degHeading = radToDeg(m_heading);
+
+	if(abs(degHeading) > 360.0) {
+		m_heading -= dir * degToRad(360.0);
+	}
+
+	m_lookPoint = sf::Vector2f(m_position.x + direction().x * m_visionRange, m_position.y + direction().y * m_visionRange);
 }
 
 
@@ -132,8 +168,8 @@ void Player::collide(std::vector<Wall*> &walls) {
 			
 
 			if(idx == 0) 		m_position.y = wallPos.y - m_size;
-			else if(idx == 1) 	m_position.x = wallPos.x+wallSize.x + m_size;
-			else if(idx == 2) 	m_position.y = wallPos.y+wallSize.y + m_size;
+			else if(idx == 1) 	m_position.x = wallPos.x + wallSize.x + m_size;
+			else if(idx == 2) 	m_position.y = wallPos.y + wallSize.y + m_size;
 			else 				m_position.x = wallPos.x - m_size;
 		}
 
@@ -144,97 +180,54 @@ void Player::collide(std::vector<Wall*> &walls) {
 
 
 
-void Player::drawVision(sf::RenderWindow &window) {
-	sf::VertexArray arr(sf::LinesStrip);
 
-    arr.append(sf::Vertex(m_position, sf::Color::Green));
-    
-	for(sf::Vector2f v : getCirclePoints(angle(m_lookPoint - m_position), degToRad(m_visionAngle), m_visionRange))
-		arr.append(sf::Vertex(m_position + v, sf::Color::Green));
+std::vector<sf::Vector2f> Player::looks(std::vector<Wall*> &walls) {
+	std::vector<sf::Vector2f> rays = {};
 
-    arr.append(sf::Vertex(m_position, sf::Color::Green));
+	std::vector<std::vector<sf::Vector2f>> wallEdges = {};
 
-	window.draw(arr);
-}
-
-
-
-
-
-void Player::sonar(sf::RenderWindow &window, std::vector<Wall*> &walls) {
-
-	sf::Vector2f boundaries[2];
-
-	float h = m_heading - degToRad(m_visionAngle/2);
-	sf::Vector2f d(cos(h), sin(h));
-	boundaries[0] = sf::Vector2f(m_position.x + d.x*m_visionRange, m_position.y + d.y*m_visionRange);
-	
-	h = m_heading + degToRad(m_visionAngle/2);
-	d = sf::Vector2f(cos(h), sin(h));
-	boundaries[1] = sf::Vector2f(m_position.x + d.x*m_visionRange, m_position.y + d.y*m_visionRange);
-
-	float a[] = {
-		std::min(vectorToAngle(m_position, boundaries[0]), vectorToAngle(m_position, boundaries[1])),
-		std::max(vectorToAngle(m_position, boundaries[0]), vectorToAngle(m_position, boundaries[1]))
-	};
-
-	//
-
-	std::vector<sf::Vector2f> closest = {};
-
-	// c1 = vectorToAngle(m_position, sf::Vector2f(0, 0));
-	// c2 = vectorToAngle(m_position, sf::Vector2f(m_limits.x, 0));
-	// c3 = vectorToAngle(m_position, m_limits);
-	// c4 = vectorToAngle(m_position, sf::Vector2f(0, m_limits.y));
-
-	sf::Vector2f p1 = sf::Vector2f(0, 0);
-	sf::Vector2f p2 = sf::Vector2f(m_limits.x, 0);
-	sf::Vector2f p3 = m_limits;
-	sf::Vector2f p4 = sf::Vector2f(0, m_limits.y);
-
-	if(isUnderVision(p1, a)) closest.push_back(p1);
-	if(isUnderVision(p2, a)) closest.push_back(p2);
-	if(isUnderVision(p3, a)) closest.push_back(p3);
-	if(isUnderVision(p4, a)) closest.push_back(p4);
-	
-
-	for(auto wall : walls) {
-		sf::Vector2f wallSize = wall->getSize();
-		
-		p1 = wall->getPosition();
-		p2 = sf::Vector2f(p1.x+wallSize.x, p1.y);
-		p3 = sf::Vector2f(p1.x, p1.y+wallSize.y);
-		p4 = sf::Vector2f(p1.x+wallSize.x, p1.y+wallSize.y);
-
-		// add it ?
-		if(isUnderVision(p1, a)) closest.push_back(p1);
-		if(isUnderVision(p2, a)) closest.push_back(p2);
-		if(isUnderVision(p3, a)) closest.push_back(p3);
-		if(isUnderVision(p4, a)) closest.push_back(p4);
-	}	
-
-	// display closest vertex
-	sf::Vertex line[2];
-	line[0] = sf::Vertex(m_position, sf::Color::Red);
-	
-	for(auto vertex : closest) {
-		line[1] = sf::Vertex(sf::Vector2f(vertex.x, vertex.y), sf::Color::Red);
-		window.draw(line, 2, sf::Lines);
+	for(auto& wall : walls) {
+		for(auto i=0; i < 4; i++) {
+			wallEdges.push_back((*wall)[i]);
+		}
 	}
-}
 
+	for(auto& ray : m_rays) {
+		// which wall is the nearest from all other to the current ray - distance value
+		float minimal = std::numeric_limits<double>::infinity();
+		
+		// vector intersection point of [this - minimal]
+		sf::Vector2f closest;
+		bool hasClosest = false;
 
+		// for each wall
+		for(auto& wall : wallEdges) {
 
+			// get the intersection's point between the ray and the wall
+			sf::Vector2f pt = ray.cast(wall);
 
+			// then d is the distance betwwen the player and the intersection point
+			float d = dist(m_position, pt);
 
-bool Player::isUnderVision(sf::Vector2f &point, float *a) {
-	int r = 0;
-	
-	// -- in visionAngle
-	if(isBetween(vectorToAngle(m_position, point), a[0], a[1])) r++;
+			// if the distance between the player and the current wall is lower than the previous lower registered one
+			if(d < minimal) {
+				// register it as the new closest intersection point
+				closest = pt;
+				hasClosest = true;
+			}
+			
+			minimal = std::min(d, minimal);
+		
+		}
 
-	// -- in visionRange
-	if(dist(m_position, point) <= dist(m_position, m_lookPoint)) r++;
+		// if it intersects with at least one wall
+		if(hasClosest) {
+			// push that intersection point in the array of intersection points
+			rays.push_back(closest);				
+		}
+		
 
-	return r == 2;
+	}
+
+	return rays;
 }

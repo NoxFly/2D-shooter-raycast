@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 
+
 class Wall {
 	public:
 		/**
@@ -15,6 +16,8 @@ class Wall {
 		 */
 		Wall(float x, float y, float width, float height);
 		~Wall();
+
+		std::vector<sf::Vector2f> operator[](int pos);
 
 		/**
 		 * Draws the wall
@@ -35,11 +38,15 @@ class Wall {
 		sf::Vector2f getSize() const;
 
 	private:
+		// wall's border thickness
+		int m_borderThickness;
+
 		// wall's position
 		sf::Vector2f m_position;
 
 		// wall's size
 		sf::Vector2f m_size;
+
 };
 
 #endif // wall

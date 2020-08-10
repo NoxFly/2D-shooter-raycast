@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "common.h"
+#include "win_prop.h"
 #include "Scene.h"
 
 int main(int argc, char **argv) {

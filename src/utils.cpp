@@ -7,6 +7,13 @@ float degToRad(float deg) {
 
 
 
+float radToDeg(float rad) {
+	return rad * 180 / M_PI;
+}
+
+
+
+
 
 float angle(sf::Vector2f v) {
     return std::atan2(v.y, v.x);
@@ -19,6 +26,14 @@ float angle(sf::Vector2f v) {
 float vectorToAngle(sf::Vector2f v1, sf::Vector2f v2) {
 	auto r = std::atan2( v2.y - v1.y, v2.x - v1.x ) * 180 / M_PI;
 	return r < 0 ? r + 360 : r;
+}
+
+
+
+
+
+sf::Vector2f angleToVector(float angle) {
+	return sf::Vector2f(cos(angle), sin(angle));
 }
 
 
