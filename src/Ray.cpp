@@ -79,8 +79,8 @@ void Ray::setLength(const float length) {
 sf::Vector2f Ray::cast(const std::vector<sf::Vector2f> &wall) {
     float x1 = wall[0].x;
     float y1 = wall[0].y;
-    float x2 = x1 + wall[1].x;
-    float y2 = y2 + wall[1].y;
+    float x2 = wall[1].x;
+    float y2 = wall[1].y;
 
     float x3 = m_position.x;
     float y3 = m_position.y;
