@@ -28,23 +28,23 @@ std::vector<sf::Vector2f> Wall::operator[](int pos) {
 
 	switch(pos) {
 		case 0: // top
-			wallPos.push_back(m_position);
-			wallPos.push_back(sf::Vector2f(m_position.x + m_size.x, m_position.y));
+			wallPos.push_back(m_position - sf::Vector2f(m_borderThickness, m_borderThickness));
+			wallPos.push_back(sf::Vector2f(m_position.x + m_size.x + 2 * m_borderThickness, m_position.y - m_borderThickness));
 			break;
 
 		case 1: // right
-			wallPos.push_back(sf::Vector2f(m_position.x + m_size.x, m_position.y));
-			wallPos.push_back(m_position + m_size);
+			wallPos.push_back(sf::Vector2f(m_position.x + m_size.x + m_borderThickness, m_position.y - m_borderThickness));
+			wallPos.push_back(m_position + m_size + sf::Vector2f(m_borderThickness, m_borderThickness));
 			break;
 		
 		case 2: // bottom
-			wallPos.push_back(sf::Vector2f(m_position.x, m_position.y + m_size.y));
-			wallPos.push_back(m_position + m_size);
+			wallPos.push_back(sf::Vector2f(m_position.x - m_borderThickness, m_position.y + m_size.y + m_borderThickness));
+			wallPos.push_back(m_position + m_size + sf::Vector2f(m_borderThickness, m_borderThickness));
 			break;
 		
 		case 3: // left
-			wallPos.push_back(m_position);
-			wallPos.push_back(sf::Vector2f(m_position.x, m_position.y + m_size.y));
+			wallPos.push_back(m_position - sf::Vector2f(m_borderThickness, m_borderThickness));
+			wallPos.push_back(sf::Vector2f(m_position.x - m_borderThickness, m_position.y + m_size.y + 2 * m_borderThickness));
 			break;
 		
 		default:
