@@ -12,10 +12,10 @@ On console :
 
 It applies last changes by doing `make` then it executes the generated executable (on `bin/debug/raycast.exe`).
 
-If you want to execute release version :
+If you want to execute debug version :
 
 ```bash
-./run.sh release
+./run.sh -d
 ```
 
 If, doing the `./run.sh`, the code seems to not be actualizing, do `make clean` then `./run.sh` again, to clear object files.

@@ -1,28 +1,37 @@
 #!/bin/bash
 
-export DISPLAY=localhost:0.0
+# if any mode is precised, then release is the default one
+mode="release"
+# project folder's name is the default application's name
+pgname=${PWD##*/}
 
-printf "\-\-\- Running shell script -/-/-/\n"
-
-exepath="./bin"
-exe="raycast.exe"
-
-mode="none"
-
-if [ $# -eq 0 ] || [ \( $# -eq 1 \) -a \( $1 = "debug" -o $1 = "DEBUG" \) ]; then
-    mode="debug"
-elif [ \( $# -eq 1 \) -a \( $1 = "release" -o $1 = "RELEASE" \) ]; then
-    mode="release"
-else
-    echo "usage: $0 [release/debug]"
-    exit
+# release / debug mode / program name
+if [ $# -eq 1 ]; then
+    if [ $1 = "-d" ]; then
+        mode="debug"
+    elif [ $1 = "-r" ]; then
+        mode="release"
+    else
+        pgname=$1
+    fi
+elif [ $# -eq 2 ]; then
+    if [ $1 = "-d" ]; then
+        mode="debug"
+    elif [ $1 = "-r" ]; then
+        mode="release"
+    else
+        echo "Undefined mode given : $1"
+        exit 1
+    fi
+    pgname=$2
 fi
 
-#export DISPLAY=localhost:0.0
-
-printf "Running $mode mode...\n\n"
-if [ $mode = "debug" ]; then
-    make && printf "\n--- EXECUTION ---\n\n" && $exepath/debug/$exe
-elif [ $mode = "release" ]; then
-    make RELEASE=1 && printf "\n--- EXECUTION ---\n\n" && $exepath/release/$exe
+# detect os and adapt executable extension
+if [ "$OSTYPE" == "darwin"* ]; then # mac OS
+    pgname=$pgname.app
+elif [ "$OSTYPE" == "cygwin" -o "$OSTYPE" == "msys" -o "$OSTYPE" == "win32" ]; then # windows
+    pgname=$pgname.exe
 fi
+
+# compile and execute if succeed
+make ${mode^^}=1 PGNAME=$pgname && ./bin/$mode/$pgname

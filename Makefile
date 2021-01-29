@@ -4,25 +4,39 @@ ifeq ($(CXX), g++) # detect if compiler is gcc instead of clang. Not viewing for
 endif
 CFLAGS 		:= -std=c++17 -Wno-unused-command-line-argument #-Wall -Wextra
 
-EXECUTABLE 	:= raycast
-EXT 		:= exe
-TARGETDIR_1 := ./bin
+# executable name
+ifdef PGNAME
+	EXECUTABLE = $(PGNAME)
+else
+	EXECUTABLE 	:= program
+endif
 
-ifneq ($(RELEASE), 1)
+# program name location
+ifdef OUT
+	TARGETDIR_1 := $(OUT)
+else
+	TARGETDIR_1 := ./bin
+endif
+
+# compilation mode
+ifdef DEBUG
 	TARGETDIR = $(TARGETDIR_1)/debug
 else
 	TARGETDIR = $(TARGETDIR_1)/release
 	CFLAGS = -o
 endif
 
-TARGET 		:= $(TARGETDIR)/$(EXECUTABLE).$(EXT)
+# final full executable location
+TARGET 		:= $(TARGETDIR)/$(EXECUTABLE)
 
-
+# .o location
 BUILDDIR 	:= ./build
 
+# source files location
 SRCDIR 		:= ./src
+# header files location
 INCDIR 		:= ./include
-
+# type of source files
 SRCEXT 		:= cpp
 
 
@@ -35,7 +49,7 @@ INCLIST 	:= $(patsubst $(INCDIR)/%, -I $(INCDIR)/%, $(INCDIRS))
 BUILDLIST 	:= $(patsubst $(INCDIR)/%, $(BUILDDIR)/%, $(INCDIRS))
 
 INC 		:= -I $(INCDIR) $(INCLIST)
-LIBS 		:= -lsfml-graphics -lsfml-window -lsfml-system
+LIBS 		:= #-lsfml-graphics -lsfml-window -lsfml-system
 
 
 $(TARGET): $(OBJECTS)
