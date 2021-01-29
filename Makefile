@@ -49,7 +49,7 @@ INCLIST 	:= $(patsubst $(INCDIR)/%, -I $(INCDIR)/%, $(INCDIRS))
 BUILDLIST 	:= $(patsubst $(INCDIR)/%, $(BUILDDIR)/%, $(INCDIRS))
 
 INC 		:= -I $(INCDIR) $(INCLIST)
-LIBS 		:= #-lsfml-graphics -lsfml-window -lsfml-system
+LIBS 		:= -lsfml-graphics -lsfml-window -lsfml-system
 
 
 $(TARGET): $(OBJECTS)
