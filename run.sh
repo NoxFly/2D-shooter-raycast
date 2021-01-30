@@ -6,24 +6,9 @@ mode="release"
 pgname=${PWD##*/}
 
 # release / debug mode / program name
-if [ $# -eq 1 ]; then
-    if [ $1 = "-d" ]; then
-        mode="debug"
-    elif [ $1 = "-r" ]; then
-        mode="release"
-    else
-        pgname=$1
-    fi
-elif [ $# -eq 2 ]; then
-    if [ $1 = "-d" ]; then
-        mode="debug"
-    elif [ $1 = "-r" ]; then
-        mode="release"
-    else
-        echo "Undefined mode given : $1"
-        exit 1
-    fi
-    pgname=$2
+if [ $# -gt 0 ] && [ $1 == "-d" -o $1 == "-r" ]; then
+    [[ $1 == "-d" ]] && mode="debug" || mode="release"
+    shift
 fi
 
 # detect os and adapt executable extension
@@ -34,4 +19,4 @@ elif [ "$OSTYPE" == "cygwin" -o "$OSTYPE" == "msys" -o "$OSTYPE" == "win32" ]; t
 fi
 
 # compile and execute if succeed
-make ${mode^^}=1 PGNAME=$pgname && ./bin/$mode/$pgname
+make ${mode^^}=1 PGNAME=$pgname && printf "\n-----\n\n" && ./bin/$mode/$pgname $@

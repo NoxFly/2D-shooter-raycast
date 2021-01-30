@@ -61,7 +61,7 @@ SOURCES 	:= $(shell find $(SRCDIR)/** -type f -name *.$(SRCEXT))
 INCDIRS		:=
 INCLIST		:=
 BUILDLIST	:=
-INC		:= -I $(INCDIR)
+INC			:= -I $(INCDIR)
 
 ifneq ("$(ls -A "$(INCDIR)" 2> /dev/null)", "")
 	INCDIRS 	:= $(shell find $(INCDIR)/** -name '*.h' -exec dirname {} \; | sort | uniq)
@@ -82,7 +82,7 @@ $(TARGET): $(OBJECTS)
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
 	@mkdir -p $(BUILDDIR)
-ifneq ("$(ls -A "$(INCDIR)" 2> /dev/null)", "")
+ifdef BUILDLIST
 	@mkdir -p $(BUILDLIST)
 endif
 	@echo "Compiling $<...";
