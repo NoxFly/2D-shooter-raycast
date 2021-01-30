@@ -1,51 +1,19 @@
 # 2D-Shooter-Raycast
 
-The configuration is set up for Linux environment.
-
 ## Execution
 
 On console :
 
 ```bash
-./run.sh
+./run.sh # for release mode, same as ./run.sh -r
+./run.sh -d # for debug version
 ```
 
-It applies last changes by doing `make` then it executes the generated executable (on `bin/debug/raycast.exe`).
+## Usage
 
-If you want to execute debug version :
+You can move forward with key `Z`, backward with `S`, turn left with `Q` and turn right with `D`.
 
-```bash
-./run.sh -d
-```
-
-If, doing the `./run.sh`, the code seems to not be actualizing, do `make clean` then `./run.sh` again, to clear object files.
-
-
-## Structure
-
-All `.o` files are on the `build/` folder.
-
-All `.h` files are on the `include/` folder.
-
-All `.cpp` files are on the `src/` folder.
-
-
-Executables `.exe` are either  on `bin/debug/` or `bin/release` folders depending on the execution you want.
-
-```
-Main
-  | win_prop: the configuration of the window
-  | Scene
-    | Input
-      | manage all user's input binding the window of the scene
-    | Player
-      | position, direction, speed, ...
-      | Ray(s)
-        | player's position, player's heading, angle offset, length ...
-    | Wall(s)
-      | position, size, ...
-    
-```
+You also can mouse down and move it, so you'll drag and drop the player.
 
 ## Process for the raycasting
 
@@ -64,5 +32,3 @@ On each frames:
     else:
       ray's size = ray's length
 ```
-
-Maybe there's more efficient...
